@@ -23,10 +23,38 @@ public class ClienteController {
 
     //buscar cliente por id
     @GetMapping("{id}")
-    public Cliente findbyId(@PathVariable Integer id){
+    public Cliente buscarPorId(@PathVariable Integer id){
         //retorna o id, senão uma mensagem de não encontrado
         return repository
                 .findById(id)
+                .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+
+    //método deletar um cliente
+    @DeleteMapping("{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void deletar(@PathVariable Integer id){
+        repository
+                //buscar o cliente primeiro, se houver deletar, senão mensagem de não encontrado
+                .findById(id)
+                .map( cliente -> {
+                    repository.delete(cliente);
+                    return Void.TYPE;
+                })
+                .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND));
+    }
+
+    //método para atualizar/editar dados de um cliente
+    @PutMapping("{id}")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void atualizar(@PathVariable Integer id, @RequestBody Cliente clienteAtualizado){
+        repository
+                //buscar o cliente primeiro, se houver deletar, senão mensagem de não encontrado
+                .findById(id)
+                .map( cliente -> {
+                    clienteAtualizado.setId(cliente.getId());
+                    return repository.save(clienteAtualizado);
+                })
                 .orElseThrow( () -> new ResponseStatusException(HttpStatus.NOT_FOUND));
     }
 
